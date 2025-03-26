@@ -5,11 +5,10 @@
 
 #define COMPUTER 1
 #define HUMAN 2
-#define SIDE 3
 #define COMPUTERMOVE 'O'
 #define HUMANMOVE 'X'
 
-// Structure to store the best move
+// Хамгийн сайн хөдөлгөөнийг хадгалах бүтэц
 struct Move {
     int row, col;
 };
@@ -18,7 +17,7 @@ struct Move {
 char player = 'O', opponent = 'X';
 int difficulty = 3; // Default to Hard
 
-// Function to check if moves are left on the board
+// hudulguun uldsen eshiig shalgana
 bool isMovesLeft(char board[3][3]) {
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
@@ -27,7 +26,7 @@ bool isMovesLeft(char board[3][3]) {
     return false;
 }
 
-// Function to evaluate the board
+// talbariig uneleh unelgee
 int evaluate(char b[3][3]) {
     for (int row = 0; row < 3; row++) {
         if (b[row][0] == b[row][1] && b[row][1] == b[row][2]) {
@@ -89,10 +88,10 @@ int minimax(char board[3][3], int depth, bool isMax, int alpha, int beta) {
     }
 }
 
-// Function to find the best move for AI
+// AI-iin best move oloh function
 struct Move findBestMove(char board[3][3]) {
     int bestVal = -1000;
-    struct Move bestMove = {-1, -1};
+    struct Move bestMove = {1, 1};
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             if (board[i][j] == '_') {
@@ -110,7 +109,7 @@ struct Move findBestMove(char board[3][3]) {
     return bestMove;
 }
 
-// Function to make a random move
+// Random hudulguun hiine
 struct Move makeRandomMove(char board[3][3]) {
     struct Move move;
     do {
@@ -120,21 +119,23 @@ struct Move makeRandomMove(char board[3][3]) {
     return move;
 }
 
-// Function to make a medium difficulty move
+// Dundaj hudulguun hiine
 struct Move makeMediumMove(char board[3][3]) {
     return (rand() % 2 == 0) ? makeRandomMove(board) : findBestMove(board);
 }
 
+//her hetsuug n songoh function
 void ChooseDifficulty() {
-    printf("Choose difficulty: 1. Easy  2. Medium  3. Hard\n");
+    printf("Her hetsuug n songo: 1. Amarhan  2. dundaj  3. Hetsuu\n");
     while (scanf("%d", &difficulty) != 1 || difficulty < 1 || difficulty > 3) {
-        printf("Invalid choice! Enter 1, 2, or 3: ");
+        printf("Buruu songolt baina! 1, 2, 3 ali negiig n songo: ");
         while (getchar() != '\n');
     }
 }
 
-// Function to display the board
+// talbariig haruulah function
 void showBoard(char board[3][3]) {
+    system("cls"); //umnuh talbariig ustgana
     printf("\n");
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
@@ -146,23 +147,23 @@ void showBoard(char board[3][3]) {
     printf("\n\n");
 }
 
-// Function to check for a winner or draw
+// Ur dung shalgana hojson tsenssen ylsan eshyg
 bool checkWinner(char board[3][3]) {
     int score = evaluate(board);
     if (score == 10) {
-        printf("COMPUTER wins!\n");
+        printf("HOJIGDCHIHLOO SUGAA!\n");
         return true;
     } else if (score == -10) {
-        printf("You win!\n");
+        printf("YALLAAA!\n");
         return true;
     } else if (!isMovesLeft(board)) {
-        printf("It's a draw!\n");
+        printf("Uuu tentslee!\n");
         return true;
     }
     return false;
 }
 
-// Function to play the game
+// Togloh function
 void playTicTacToe(int whoseTurn) {
     char board[3][3] = {{'_', '_', '_'}, {'_', '_', '_'}, {'_', '_', '_'}};
     showBoard(board);
@@ -173,22 +174,22 @@ void playTicTacToe(int whoseTurn) {
             x = move.row;
             y = move.col;
             board[x][y] = COMPUTERMOVE;
-            printf("COMPUTER placed %c at %d\n", COMPUTERMOVE, x * 3 + y + 1);
+            printf("COMPUTER %c, %d tawilaa.\n", COMPUTERMOVE, x * 3 + y + 1);
             showBoard(board);
             if (checkWinner(board)) return;
             whoseTurn = HUMAN;
         } else {
             int move;
-            printf("Enter your move (1-9): ");
+            printf("(1-9) too oruulj hudul: ");
             if (scanf("%d", &move) != 1 || move < 1 || move > 9) {
-                printf("Invalid input! Enter a number between 1 and 9.\n");
+                printf("Buruu too baina 1ees 9iin hoorond too oruul.\n");
                 while (getchar() != '\n');
                 continue;
             }
             x = (move - 1) / 3;
             y = (move - 1) % 3;
             if (board[x][y] != '_') {
-                printf("Invalid move! Try again.\n");
+                printf("Buruu nuudel baina. Uur nud deer tavih gej uzne uu.\n");
                 continue;
             }
             board[x][y] = HUMANMOVE;
@@ -199,15 +200,70 @@ void playTicTacToe(int whoseTurn) {
     }
 }
 
+//main menu function 
+void mainmenu() {
+    int choice;
+    while (1) {
+        system("cls");
+        printf("\n==== TIC-TAC-TOE ====");
+        printf("\n1. Togloh (Play)");
+        printf("\n2. Zaavar (Instructions)");
+        printf("\n3. Garah (Quit)");
+        printf("\n\nSongoltoo hiine uu: ");
+        
+        if (scanf("%d", &choice) != 1) {
+            printf("Buruu songolt baina! 1, 2, 3 ali negiig songono uu.\n");
+            while (getchar() != '\n');
+            continue;
+        }
+        
+        if (choice == 1) {
+            ChooseDifficulty();
+            int firstMove;
+            printf("Ehleed nuuhuu? (1 = Tiim, 2 = Ugui): ");
+            while (scanf("%d", &firstMove) != 1 || (firstMove != 1 && firstMove != 2)) {
+                printf("Buruu songolt baina 1 esvel 2iig songo: ");
+                while (getchar() != '\n');
+            }
+            playTicTacToe(firstMove == 1 ? HUMAN : COMPUTER);
+            {
+                char c;
+                printf("Nuur huudasruu butsahuu esvel garahuu? (y/n): ");
+                while (scanf(" %c", &c) != 1 || (c != 'y' && c != 'n')) {
+                    printf("Buruu songolt baina! y esvel n songo: ");
+                    while (getchar() != '\n');
+                }
+                if (c == 'n') break;
+            }
+        } 
+        else if (choice == 2) {
+            system("cls");
+            printf("\n==== Zaavar ====");
+            printf("\n1. Door haragdah 1-9 hurtel dugaar oruulj toglono:\n");
+            printf("\n 1 | 2 | 3 ");
+            printf("\n-----------");
+            printf("\n 4 | 5 | 6 ");
+            printf("\n-----------");
+            printf("\n 7 | 8 | 9 \n");
+            printf("\n2. Hudulguunuu hiihyn tuld hooson nud songono.\n");
+            printf("\nUrd ni ajillaj baisan toglolt baival, shine toglolt exelne.\n");
+            printf("\nEnter darj main menu ruu orno uu.\n");
+            getchar();
+            getchar();
+        } 
+        else if (choice == 3) {
+            printf("\nTogloomnoos garlaa. Bayartai!\n");
+            exit(0);
+        } 
+        else {
+            printf("Buruu songolt baina! 1, 2, 3 ali negiig songono uu.\n");
+        }
+    }
+}
+
+
 int main() {
     srand(time(0));
-    ChooseDifficulty();
-    int choice;
-    printf("Go first? (1 = YES, 2 = NO): ");
-    while (scanf("%d", &choice) != 1 || (choice != 1 && choice != 2)) {
-        printf("Invalid choice! Enter 1 or 2: ");
-        while (getchar() != '\n');
-    }
-    playTicTacToe(choice == 1 ? HUMAN : COMPUTER);
+    mainmenu();
     return 0;
 }
