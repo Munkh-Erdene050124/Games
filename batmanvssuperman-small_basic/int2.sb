@@ -1,0 +1,232 @@
+GraphicsWindow.Width = 900
+GraphicsWindow.Height = 600
+GraphicsWindow.BackgroundColor = "White"
+GraphicsWindow.Title = "Супермен vs Бэтмен Эрдэнэсийн Уралдаан"
+GraphicsWindow.FontName = "Arial"
+
+' Menu section
+GraphicsWindow.BrushColor = "Navy"
+GraphicsWindow.DrawText(375, 60, "Superman VS Batman")
+GraphicsWindow.DrawText(375, 110, "Эрдэнэсийн Уралдаан")
+
+startButton = Controls.AddButton("ТОГЛООМ ЭХЛҮҮЛЭХ", 330, 180)
+Controls.SetSize(startButton, 240, 40)
+
+howToButton = Controls.AddButton("ТОГЛООМЫН ЗААВАР", 330, 240)
+Controls.SetSize(howToButton, 240, 40)
+
+exitButton = Controls.AddButton("ГАРАХ", 330, 300)
+Controls.SetSize(exitButton, 240, 40)
+
+Controls.ButtonClicked = OnButtonClick
+
+' Variables
+gameState = "menu"
+currentPlayer = 1
+scoreSuperman = 0
+scoreBatman = 0
+treasureCollected = "False"
+supermanImg = Program.Directory + "\superman.png"
+batmanImg = Program.Directory + "\batman.png"
+treasureImg = Program.Directory + "\treasure.png"
+
+' Players and treasure
+superman = 0
+batman = 0
+treasure = 0
+turnIndicator = 0
+supermanScoreText = 0
+batmanScoreText = 0
+
+'P layer Positiom
+superX = 0
+superY = 0
+batX = 0
+batY = 0
+treasureX = 0
+treasureY = 0
+
+Sub OnButtonClick
+  clicked = Controls.LastClickedButton
+  If clicked = startButton Then
+    GraphicsWindow.Clear()
+    Controls.HideControl(startButton)
+    Controls.HideControl(howToButton)
+    Controls.HideControl(exitButton)
+    StartGame()
+  ElseIf clicked = howToButton Then
+    GraphicsWindow.ShowMessage("ЗААВАР: " + Text.GetCharacter(10) + Text.GetCharacter(10) + "• Супермен: СУМНЫ ТОВЧУУДААР ХӨДӨЛНӨ" + Text.GetCharacter(10) + "• Бэтмен: WASD ТОВЧУУДААР ХӨДӨЛНӨ" + Text.GetCharacter(10) + Text.GetCharacter(10) + "ТҮРҮҮЛЖ ЭРДЭНЭСИЙГ АВАХ НЬ ХОЖНО!", "ТОГЛООМЫН ЗААВАР")
+  ElseIf clicked = exitButton Then
+    Program.End()
+  EndIf
+EndSub
+
+Sub StartGame
+  gameState = "playing"
+  treasureCollected = "False"
+  currentPlayer = 1
+  GraphicsWindow.Clear()
+
+  ' Draw game border
+  GraphicsWindow.BrushColor = "DarkBlue"
+  GraphicsWindow.FillRectangle(0, 0, 900, 40)
+  GraphicsWindow.BrushColor = "White"
+  
+  ' Topbar Display
+  supermanScoreText = Shapes.AddText("Супермен")
+  batmanScoreText = Shapes.AddText("Бэтмен")
+  Shapes.Move(supermanScoreText, 10, 10)
+  Shapes.Move(batmanScoreText, 800, 10)
+
+  turnIndicator = Shapes.AddText("СУПЕРМЕН-Ы ЭЭЛЖ")
+  Shapes.Move(turnIndicator, 380, 10)
+
+  ' Treasure image
+  treasureX = Math.GetRandomNumber(800) + 20
+  treasureY = Math.GetRandomNumber(500) + 50
+  treasure = Shapes.AddImage(treasureImg)
+  Shapes.Move(treasure, treasureX, treasureY)
+  
+  ' Position players with minimum distance
+  validPlacement = "False"
+  While validPlacement = "False"
+    superX = Math.GetRandomNumber(800) + 20
+    superY = Math.GetRandomNumber(500) + 50
+    batX = Math.GetRandomNumber(800) + 20
+    batY = Math.GetRandomNumber(500) + 50
+
+    playerDistance = Math.SquareRoot((superX - batX) * (superX - batX) + (superY - batY) * (superY - batY))
+    treasureDist1 = Math.SquareRoot((superX - treasureX) * (superX - treasureX) + (superY - treasureY) * (superY - treasureY))
+    treasureDist2 = Math.SquareRoot((batX - treasureX) * (batX - treasureX) + (batY - treasureY) * (batY - treasureY))
+    
+    If playerDistance > 100 And treasureDist1 > 50 And treasureDist2 > 50 Then
+      validPlacement = "True"
+    EndIf
+  EndWhile
+
+  ' Superman image
+  superman = Shapes.AddImage(supermanImg)
+  Shapes.Move(superman, superX, superY)
+
+  ' Batman image
+  batman = Shapes.AddImage(batmanImg)
+  Shapes.Move(batman, batX, batY)
+
+  GraphicsWindow.KeyDown = OnKeyDown
+EndSub
+
+Sub OnKeyDown
+  key = GraphicsWindow.LastKey
+
+  If gameState = "playing" Then
+
+    ' Superman's turn
+    If currentPlayer = 1 Then
+      If key = "Left" Or key = "Right" Or key = "Up" Or key = "Down" Then
+        newX = superX
+        newY = superY
+
+        If key = "Left" Then
+          newX = newX - 20
+        ElseIf key = "Right" Then
+          newX = newX + 20
+        ElseIf key = "Up" Then
+          newY = newY - 20
+        ElseIf key = "Down" Then
+          newY = newY + 20
+        EndIf
+
+        If newX > 20 And newX < 840 And newY > 60 And newY < 540 Then
+          ' Check collision with Batman
+          distance = Math.SquareRoot((newX - batX) * (newX - batX) + (newY - batY) * (newY - batY))
+          If distance >= 60 Then
+            superX = newX
+            superY = newY
+            Shapes.Move(superman, superX, superY)
+            currentPlayer = 2
+            Shapes.SetText(turnIndicator, "БЭТМЕН-Ы ЭЭЛЖ")
+            CheckTreasure()
+          EndIf
+        EndIf
+      EndIf
+
+    ' Batman's turn
+    ElseIf currentPlayer = 2 Then
+      If key = "A" Or key = "D" Or key = "W" Or key = "S" Then
+        newX = batX
+        newY = batY
+
+        If key = "A" Then
+          newX = newX - 20
+        ElseIf key = "D" Then
+          newX = newX + 20
+        ElseIf key = "W" Then
+          newY = newY - 20
+        ElseIf key = "S" Then
+          newY = newY + 20
+        EndIf
+
+        If newX > 20 And newX < 840 And newY > 60 And newY < 540 Then
+          distance = Math.SquareRoot((newX - superX) * (newX - superX) + (newY - superY) * (newY - superY))
+          'Check collision with Superman
+          If distance >= 60 Then
+            batX = newX
+            batY = newY
+            Shapes.Move(batman, batX, batY)
+            currentPlayer = 1
+            Shapes.SetText(turnIndicator, "СУПЕРМЕН-Ы ЭЭЛЖ")
+            CheckTreasure()
+          EndIf
+        EndIf
+      EndIf
+    EndIf
+  EndIf
+EndSub
+
+Sub CheckTreasure
+  superDist = Math.SquareRoot((superX - treasureX) * (superX - treasureX) + (superY - treasureY) * (superY - treasureY))
+  batDist = Math.SquareRoot((batX - treasureX) * (batX - treasureX) + (batY - treasureY) * (batY - treasureY))
+
+  If superDist < 100 And treasureCollected = "False" Then
+    treasureCollected = "True"
+    scoreSuperman = scoreSuperman + 1
+    winnerMessage = "СУПЕРМЕН ХОЖЛОО!"
+    GameOver()
+  ElseIf batDist < 100 And treasureCollected = "False" Then
+    treasureCollected = "True"
+    scoreBatman = scoreBatman + 1
+    winnerMessage = "БЭТМЕН ХОЖЛОО!"
+    GameOver()
+  EndIf
+EndSub
+
+Sub GameOver
+  gameState = "gameOver"
+
+  ' Remove all shapes
+  Shapes.Remove(treasure)
+  Shapes.Remove(superman)
+  Shapes.Remove(batman)
+  Shapes.Remove(turnIndicator)
+  Shapes.Remove(supermanScoreText)
+  Shapes.Remove(batmanScoreText)
+
+  ' Draw winner message
+  GraphicsWindow.BrushColor = "DarkBlue"
+  GraphicsWindow.FillRectangle(200, 200, 500, 150)
+  GraphicsWindow.BrushColor = "Gold"
+  GraphicsWindow.FontSize = 32
+  GraphicsWindow.DrawText(280, 250, winnerMessage)
+
+  exitBttn = Controls.AddButton("Гарах", 350, 320)
+  Controls.SetSize(exitBttn, 200, 60)
+  Controls.ButtonClicked = OnGameOverButtonClick
+EndSub
+
+Sub OnGameOverButtonClick
+  clicked = Controls.LastClickedButton
+  If clicked = exitBttn Then
+    Controls.Remove(exitBttn)
+    Program.End()
+  EndIf
+EndSub
